@@ -1,0 +1,3 @@
+- [ ] Record metadata at end of run
+- [ ] Read metadata at start of run
+- [ ] Running in date groups, ordering by fastest
