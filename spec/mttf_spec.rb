@@ -1,10 +1,10 @@
-require 'date'
-require 'rspec/core/sandbox'
-require 'rspec/ordering/mttf'
+require "date"
+require "rspec/core/sandbox"
+require "rspec/ordering/mttf"
 
 describe RSpec::Ordering::Mttf do
-  it 'has a version' do
-    expect(described_class::VERSION).to eq('0.1.0')
+  it "has a version" do
+    expect(described_class::VERSION).to eq("0.1.0")
   end
 
   def run_with_ordering_log
@@ -18,18 +18,18 @@ describe RSpec::Ordering::Mttf do
   end
 
   describe RSpec::Ordering::Mttf::Orderer do
-    it 'runs examples that have never been run first' do
+    it "runs examples that have never been run first" do
       run_order = run_with_ordering_log do |ordering_log|
-        RSpec.describe 'unordered group' do
-          it 'runs this one second', last_run_date: Date.today, last_failed_date: Date.today do
+        RSpec.describe "unordered group" do
+          it "runs this one second", last_run_date: Date.today, last_failed_date: Date.today do
             ordering_log << 2
           end
 
-          it 'runs this one last', last_run_date: Date.today do
+          it "runs this one last", last_run_date: Date.today do
             ordering_log << 3
           end
 
-          it 'runs this one first' do
+          it "runs this one first" do
             ordering_log << 1
           end
         end
@@ -38,18 +38,18 @@ describe RSpec::Ordering::Mttf do
       expect(run_order).to eq([1, 2, 3])
     end
 
-    it 'runs examples that have failed more recently first' do
+    it "runs examples that have failed more recently first" do
       run_order = run_with_ordering_log do |ordering_log|
-        RSpec.describe 'unordered group' do
-          it 'runs this one second', last_run_date: Date.today, last_failed_date: Date.today - 2 do
+        RSpec.describe "unordered group" do
+          it "runs this one second", last_run_date: Date.today, last_failed_date: Date.today - 2 do
             ordering_log << 2
           end
 
-          it 'runs this one last', last_run_date: Date.today, last_failed_date: Date.today - 3 do
+          it "runs this one last", last_run_date: Date.today, last_failed_date: Date.today - 3 do
             ordering_log << 3
           end
 
-          it 'runs this one first', last_run_date: Date.today, last_failed_date: Date.today do
+          it "runs this one first", last_run_date: Date.today, last_failed_date: Date.today do
             ordering_log << 1
           end
         end
