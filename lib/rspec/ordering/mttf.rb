@@ -2,6 +2,8 @@
 
 require_relative "mttf/version"
 
+RSpec.configuration.add_setting :current_date
+
 module RSpec
   module Ordering
     module Mttf
@@ -48,15 +50,19 @@ module RSpec
 
         private
 
-        ExampleResultData = Struct.new(:status, keyword_init: true)
-
         def construct_results(examples)
           examples.each_with_object({}) do |example, object|
-            object[example.id] = ExampleResultData.new(status: example.execution_result.status)
+            object[example.id] = ExampleResultData.from_example(example)
           end
         end
 
         attr_reader :store
+      end
+
+      ExampleResultData = Struct.new(:status, :last_failed_date, :last_run_date, keyword_init: true) do
+        def self.from_example(example)
+          new(status: example.execution_result.status, last_failed_date: RSpec.configuration.current_date, last_run_date: RSpec.configuration.current_date)
+        end
       end
     end
   end

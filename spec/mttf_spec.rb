@@ -101,4 +101,39 @@ describe RSpec::Ordering::Mttf do
       expect(subject.read[example_group.examples.first.id].status).to eq(:passed)
     end
   end
+
+  describe RSpec::Ordering::Mttf::ExampleResultData do
+    it "saves status" do
+      RSpec::Core::Sandbox.sandboxed do
+        group = RSpec.describe "examples" do
+          it "should pass" do
+            expect(2).to eq(2)
+          end
+        end
+        group.run
+        example = group.examples.first
+        subject = described_class.from_example(example)
+
+        expect(subject.status).to eq(:passed)
+      end
+    end
+
+    it "saves last_failed_date and last_run_date" do
+      RSpec::Core::Sandbox.sandboxed do |config|
+        config.add_setting :current_date
+        config.current_date = Date.new(1993, 10, 3)
+
+        group = RSpec.describe "examples" do
+          it "should fail" do
+            expect(2).to eq(1)
+          end
+        end
+        group.run
+        example = group.examples.first
+        subject = described_class.from_example(example)
+        expect(subject.last_failed_date).to eq(Date.new(1993, 10, 3))
+        expect(subject.last_run_date).to eq(Date.new(1993, 10, 3))
+      end
+    end
+  end
 end
