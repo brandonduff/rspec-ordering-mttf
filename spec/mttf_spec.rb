@@ -88,6 +88,7 @@ describe RSpec::Ordering::Mttf do
 
     it "puts saved data on the example" do
       example_group = RSpec::Core::Sandbox.sandboxed do |config|
+        config.output_stream = StringIO.new # prevent printing report to $stdout
         config.reporter.register_listener(described_class.new("test_results.store"), :dump_summary)
         example_group = RSpec.describe "examples" do
           it "has some new metadata" do
