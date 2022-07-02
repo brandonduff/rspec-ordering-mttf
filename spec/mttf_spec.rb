@@ -61,32 +61,8 @@ describe RSpec::Ordering::Mttf do
 
   describe RSpec::Ordering::Mttf::RunMemory do
     subject { described_class.new("test_results.store") }
-    after do
-      File.delete("test_results.store")
-    end
 
-    it "can write examples" do
-      example_group = RSpec::Core::Sandbox.sandboxed do
-        example_group = RSpec.describe "examples to persist" do
-          it "passes" do
-            expect(2).to eq(2)
-          end
-
-          it "fails" do
-            fail("oops i failed")
-          end
-        end
-        example_group.run
-        example_group
-      end
-
-      examples = example_group.examples
-      subject.write(examples)
-      expect(subject.read[examples.first.id].status).to eq(:passed)
-      expect(subject.read[examples.last.id].status).to eq(:failed)
-    end
-
-    it "puts saved data on the example" do
+    it "writes and reads examples with status metadata" do
       example_group = RSpec::Core::Sandbox.sandboxed do |config|
         config.output_stream = StringIO.new # prevent printing report to $stdout
         config.reporter.register_listener(described_class.new("test_results.store"), :dump_summary)
@@ -98,42 +74,46 @@ describe RSpec::Ordering::Mttf do
         config.reporter.report(1) { |reporter| example_group.run(reporter) }
         example_group
       end
+
       expect(subject.read[example_group.examples.first.id].status).to eq(:passed)
+
+      File.delete("test_results.store")
     end
   end
 
   describe RSpec::Ordering::Mttf::ExampleResultData do
-    it "saves status" do
-      RSpec::Core::Sandbox.sandboxed do
-        group = RSpec.describe "examples" do
-          it "should pass" do
-            expect(2).to eq(2)
-          end
-        end
-        group.run
-        example = group.examples.first
-        subject = described_class.from_example(example)
-
-        expect(subject.status).to eq(:passed)
-      end
-    end
-
-    it "saves last_failed_date and last_run_date" do
+    around do |example|
       RSpec::Core::Sandbox.sandboxed do |config|
         config.add_setting :current_date
         config.current_date = Date.new(1993, 10, 3)
-
-        group = RSpec.describe "examples" do
-          it "should fail" do
-            expect(2).to eq(1)
-          end
-        end
-        group.run
-        example = group.examples.first
-        subject = described_class.from_example(example)
-        expect(subject.last_failed_date).to eq(Date.new(1993, 10, 3))
-        expect(subject.last_run_date).to eq(Date.new(1993, 10, 3))
+        example.run
       end
+    end
+
+    it "saves status" do
+      group = RSpec.describe "examples" do
+        it "should pass" do
+          expect(2).to eq(2)
+        end
+      end
+      group.run
+      example = group.examples.first
+      subject = described_class.from_example(example)
+
+      expect(subject.status).to eq(:passed)
+    end
+
+    it "saves last_failed_date and last_run_date" do
+      group = RSpec.describe "examples" do
+        it "should fail" do
+          expect(2).to eq(1)
+        end
+      end
+      group.run
+      example = group.examples.first
+      subject = described_class.from_example(example)
+      expect(subject.last_failed_date).to eq(Date.new(1993, 10, 3))
+      expect(subject.last_run_date).to eq(Date.new(1993, 10, 3))
     end
   end
 end
