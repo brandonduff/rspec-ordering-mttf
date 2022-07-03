@@ -81,25 +81,31 @@ describe RSpec::Ordering::Mttf do
     end
 
     it "loads metadata from previous runs" do
-      last_run_date = nil
+      last_run_date = last_failed_date = nil
       sandboxed do |runner|
         example_group = RSpec.describe "examples" do
           it "is an example" do |example|
             expect(2).to eq(2)
             last_run_date = example.metadata[:last_run_date]
           end
+
+          it "is a failed example" do |example|
+            last_failed_date = example.metadata[:last_failed_date]
+            expect(2).to eq(1)
+          end
         end
         runner.call(example_group)
         runner.call(example_group)
       end
       expect(last_run_date).to eq(Date.new(1993, 10, 3))
+      expect(last_failed_date).to eq(Date.new(1993, 10, 3))
     end
 
     def sandboxed
       RSpec::Core::Sandbox.sandboxed do |config|
         config.output_stream = StringIO.new # prevent printing report to $stdout
 
-        RSpec::Ordering::Mttf.configure(config, current_date: Date.new(1993, 10, 3))
+        RSpec::Ordering::Mttf.configure(config, current_date: Date.new(1993, 10, 3), previous_run_data: "test_results.store")
         yield ->(example_group) { config.with_suite_hooks { config.reporter.report(1) { |reporter| example_group.run(reporter) } } }
       end
     end

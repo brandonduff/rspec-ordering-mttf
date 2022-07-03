@@ -7,13 +7,17 @@ RSpec.configuration.add_setting :current_date
 module RSpec
   module Ordering
     module Mttf
-      def self.configure(config, current_date:)
+      def self.configure(config, current_date:, previous_run_data:)
+        run_memory = RunMemory.new(previous_run_data)
         config.before do |example|
-          example.metadata[:last_run_date] = RunMemory.new("test_results.store").read[example.id]&.last_run_date
+          if (memory = run_memory.read[example.id])
+            example.metadata[:last_run_date] = memory.last_run_date
+            example.metadata[:last_failed_date] = memory.last_failed_date
+          end
         end
         config.add_setting :current_date
         config.current_date = current_date
-        config.reporter.register_listener(Mttf::RunMemory.new("test_results.store"), :dump_summary)
+        config.reporter.register_listener(run_memory, :dump_summary)
       end
 
       class Orderer
