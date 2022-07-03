@@ -10,7 +10,7 @@ describe RSpec::Ordering::Mttf do
   def run_with_ordering_log
     ordering_log = []
     RSpec::Core::Sandbox.sandboxed do |config|
-      config.register_ordering(:global, RSpec::Ordering::Mttf::Orderer.new)
+      config.register_ordering(:global, RSpec::Ordering::Mttf::Orderer.new(RSpec::Ordering::Mttf::RunMemory.new("test_results.store")))
       example_group = yield(ordering_log)
       example_group.run
     end
@@ -82,14 +82,17 @@ describe RSpec::Ordering::Mttf do
 
     it "loads metadata from previous runs" do
       last_run_date = last_failed_date = nil
+      ordering_log = []
       sandboxed do |runner|
         example_group = RSpec.describe "examples" do
           it "is an example" do |example|
+            ordering_log << 1
             expect(2).to eq(2)
             last_run_date = example.metadata[:last_run_date]
           end
 
           it "is a failed example" do |example|
+            ordering_log << 2
             last_failed_date = example.metadata[:last_failed_date]
             expect(2).to eq(1)
           end
@@ -99,6 +102,7 @@ describe RSpec::Ordering::Mttf do
       end
       expect(last_run_date).to eq(Date.new(1993, 10, 3))
       expect(last_failed_date).to eq(Date.new(1993, 10, 3))
+      expect(ordering_log).to eq([1, 2, 2, 1])
     end
 
     def sandboxed

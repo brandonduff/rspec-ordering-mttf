@@ -9,19 +9,24 @@ module RSpec
     module Mttf
       def self.configure(config, current_date:, previous_run_data:)
         run_memory = RunMemory.new(previous_run_data)
-        config.before do |example|
-          if (memory = run_memory.read[example.id])
-            example.metadata[:last_run_date] = memory.last_run_date
-            example.metadata[:last_failed_date] = memory.last_failed_date
-          end
-        end
         config.add_setting :current_date
         config.current_date = current_date
+        config.register_ordering(:global, Orderer.new(run_memory))
         config.reporter.register_listener(run_memory, :dump_summary)
       end
 
       class Orderer
+        attr_reader :memory
+        def initialize(memory)
+          @memory = memory
+        end
+
         def order(items)
+          items.each do |example|
+            example.metadata[:last_run_date] ||= memory.read[example.id]&.last_run_date
+            example.metadata[:last_failed_date] ||= memory.read[example.id]&.last_failed_date
+          end
+
           items.sort do |a, b|
             if a.metadata[:last_run_date].nil?
               -1
