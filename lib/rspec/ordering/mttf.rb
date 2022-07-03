@@ -61,7 +61,8 @@ module RSpec
 
       ExampleResultData = Struct.new(:status, :last_failed_date, :last_run_date, keyword_init: true) do
         def self.from_example(example)
-          new(status: example.execution_result.status, last_failed_date: RSpec.configuration.current_date, last_run_date: RSpec.configuration.current_date)
+          last_failed_date = example.execution_result.status == :failed ? RSpec.configuration.current_date : example.metadata[:last_failed_date]
+          new(status: example.execution_result.status, last_failed_date: last_failed_date, last_run_date: RSpec.configuration.current_date)
         end
       end
     end
