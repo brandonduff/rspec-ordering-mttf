@@ -62,22 +62,46 @@ describe RSpec::Ordering::Mttf do
   describe RSpec::Ordering::Mttf::RunMemory do
     subject { described_class.new("test_results.store") }
 
+    after do
+      File.delete("test_results.store")
+    end
+
     it "writes and reads examples with status metadata" do
-      example_group = RSpec::Core::Sandbox.sandboxed do |config|
-        config.output_stream = StringIO.new # prevent printing report to $stdout
-        config.reporter.register_listener(described_class.new("test_results.store"), :dump_summary)
+      example_group = sandboxed do |runner|
         example_group = RSpec.describe "examples" do
           it "has some new metadata" do
             expect(2).to eq(2)
           end
         end
-        config.reporter.report(1) { |reporter| example_group.run(reporter) }
+        runner.call(example_group)
         example_group
       end
 
       expect(subject.read[example_group.examples.first.id].status).to eq(:passed)
+    end
 
-      File.delete("test_results.store")
+    it "loads metadata from previous runs" do
+      last_run_date = nil
+      sandboxed do |runner|
+        example_group = RSpec.describe "examples" do
+          it "is an example" do |example|
+            expect(2).to eq(2)
+            last_run_date = example.metadata[:last_run_date]
+          end
+        end
+        runner.call(example_group)
+        runner.call(example_group)
+      end
+      expect(last_run_date).to eq(Date.new(1993, 10, 3))
+    end
+
+    def sandboxed
+      RSpec::Core::Sandbox.sandboxed do |config|
+        config.output_stream = StringIO.new # prevent printing report to $stdout
+
+        RSpec::Ordering::Mttf.configure(config, current_date: Date.new(1993, 10, 3))
+        yield ->(example_group) { config.with_suite_hooks { config.reporter.report(1) { |reporter| example_group.run(reporter) } } }
+      end
     end
   end
 

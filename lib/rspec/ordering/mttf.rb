@@ -7,6 +7,15 @@ RSpec.configuration.add_setting :current_date
 module RSpec
   module Ordering
     module Mttf
+      def self.configure(config, current_date:)
+        config.before do |example|
+          example.metadata[:last_run_date] = RunMemory.new("test_results.store").read[example.id]&.last_run_date
+        end
+        config.add_setting :current_date
+        config.current_date = current_date
+        config.reporter.register_listener(Mttf::RunMemory.new("test_results.store"), :dump_summary)
+      end
+
       class Orderer
         def order(items)
           items.sort do |a, b|
@@ -45,7 +54,7 @@ module RSpec
         def read
           store.transaction(true) do
             store["results"]
-          end
+          end || {}
         end
 
         private
