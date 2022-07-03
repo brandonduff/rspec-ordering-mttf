@@ -2,8 +2,6 @@
 
 require_relative "mttf/version"
 
-RSpec.configuration.add_setting :current_date
-
 module RSpec
   module Ordering
     module Mttf
