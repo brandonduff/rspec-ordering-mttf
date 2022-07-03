@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "mttf/version"
+require "ostruct"
+require "yaml/store"
 
 module RSpec
   module Ordering
@@ -14,15 +16,16 @@ module RSpec
       end
 
       class Orderer
-        attr_reader :memory
         def initialize(memory)
           @memory = memory
         end
 
         def order(items)
           items.each do |example|
-            example.metadata[:last_run_date] ||= memory.read[example.id]&.last_run_date
-            example.metadata[:last_failed_date] ||= memory.read[example.id]&.last_failed_date
+            if (example_memory = memory.read[example.id])
+              example.metadata[:last_run_date] ||= example_memory.last_run_date
+              example.metadata[:last_failed_date] ||= example_memory.last_failed_date
+            end
           end
 
           items.sort do |a, b|
@@ -39,9 +42,11 @@ module RSpec
             end
           end
         end
+
+        private
+
+        attr_reader :memory
       end
-      require "ostruct"
-      require "yaml/store"
 
       class RunMemory
         def initialize(filename)
