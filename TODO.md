@@ -1,5 +1,5 @@
-- [ ] Record metadata at end of run
-- [ ] Read metadata at start of run
+- [x] Record metadata at end of run
+- [x] Read metadata at start of run
 - [ ] Running in date groups, ordering by fastest
-- [ ] merge on metadata, don't overwrite
-- [ ] sort the groups as well. our orderer will get called with groups and then with examples in the groups
+- [x] merge on metadata, don't overwrite
+- [x] sort the groups as well. our orderer will get called with groups and then with examples in the groups

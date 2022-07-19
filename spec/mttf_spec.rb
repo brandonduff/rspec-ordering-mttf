@@ -80,6 +80,31 @@ describe RSpec::Ordering::Mttf do
       expect(subject.read[example_group.examples.first.id].status).to eq(:passed)
     end
 
+    it "saves metadata for example groups" do
+      group = sandboxed do |runner|
+        group = RSpec.describe "some examples" do
+          it "passes" do
+            expect(2).to eq(2)
+          end
+
+          it "fails" do
+            expect(2).to eq(1)
+          end
+
+          context 'nested group' do
+            it 'passes' do
+              expect(2).to eq(2)
+            end
+          end
+        end
+        runner.call(group)
+        group
+      end
+
+      expect(subject.read[group.id].status).to eq(:failed)
+      expect(subject.read[group.descendants.last.id].status).to eq(:passed)
+    end
+
     it "loads metadata from previous runs" do
       last_run_date = last_failed_date = nil
       ordering_log = []

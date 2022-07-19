@@ -12,7 +12,7 @@ module RSpec
         config.add_setting :current_date
         config.current_date = current_date
         config.register_ordering(:global, Orderer.new(run_memory))
-        config.reporter.register_listener(run_memory, :dump_summary)
+        config.reporter.register_listener(run_memory, :example_group_finished)
       end
 
       class Orderer
@@ -28,18 +28,8 @@ module RSpec
             end
           end
 
-          items.sort do |a, b|
-            if a.metadata[:last_run_date].nil?
-              -1
-            elsif b.metadata[:last_run_date].nil?
-              1
-            elsif a.metadata[:last_failed_date].nil?
-              1
-            elsif b.metadata[:last_failed_date].nil?
-              -1
-            else
-              b.metadata[:last_failed_date] <=> a.metadata[:last_failed_date]
-            end
+          items.sort_by do |example|
+            ExampleResultData.from_example_metadata(example)
           end
         end
 
@@ -53,13 +43,14 @@ module RSpec
           @store = YAML::Store.new(filename)
         end
 
-        def dump_summary(summary_notification)
-          write(summary_notification.examples)
+        def example_group_finished(summary_notification)
+          write(summary_notification.group)
         end
 
-        def write(examples)
+        def write(group)
+          existing = read
           store.transaction do
-            store["results"] = construct_results(examples)
+            store["results"] = existing.merge(construct_results(group))
           end
         end
 
@@ -71,19 +62,42 @@ module RSpec
 
         private
 
-        def construct_results(examples)
-          examples.each_with_object({}) do |example, object|
+        def construct_results(group)
+          result = group.examples.each_with_object({}) do |example, object|
             object[example.id] = ExampleResultData.from_example(example)
           end
+          result[group.id] = result.values.min
+          result
         end
 
         attr_reader :store
       end
 
       ExampleResultData = Struct.new(:status, :last_failed_date, :last_run_date, keyword_init: true) do
+        include Comparable
+
         def self.from_example(example)
           last_failed_date = example.execution_result.status == :failed ? RSpec.configuration.current_date : example.metadata[:last_failed_date]
           new(status: example.execution_result.status, last_failed_date: last_failed_date, last_run_date: RSpec.configuration.current_date)
+        end
+
+        def self.from_example_metadata(example)
+          metadata = example.metadata
+          new(status: metadata[:status], last_failed_date: metadata[:last_failed_date], last_run_date: metadata[:last_run_date])
+        end
+
+        def <=>(other)
+          if last_run_date.nil?
+            -1
+          elsif other.last_run_date.nil?
+            1
+          elsif last_failed_date.nil?
+            1
+          elsif other.last_failed_date.nil?
+            -1
+          else
+            other.last_failed_date <=> last_failed_date
+          end
         end
       end
     end
