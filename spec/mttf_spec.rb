@@ -91,8 +91,8 @@ describe RSpec::Ordering::Mttf do
             expect(2).to eq(1)
           end
 
-          context 'nested group' do
-            it 'passes' do
+          context "nested group" do
+            it "passes" do
               expect(2).to eq(2)
             end
           end
@@ -103,6 +103,25 @@ describe RSpec::Ordering::Mttf do
 
       expect(subject.read[group.id].status).to eq(:failed)
       expect(subject.read[group.descendants.last.id].status).to eq(:passed)
+    end
+
+    xit "uses the most relevant status from the child example group for the parent" do
+      group = sandboxed do |runner|
+        group = RSpec.describe "some examples" do
+          it "passes" do
+            expect(2).to eq(2)
+          end
+
+          context "nested group" do
+            it "fails" do
+              expect(2).to eq(3)
+            end
+          end
+        end
+        runner.call(group)
+        group
+      end
+      expect(subject.read[group.id].status).to eq(:failed)
     end
 
     it "loads metadata from previous runs" do

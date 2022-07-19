@@ -3,3 +3,10 @@
 - [ ] Running in date groups, ordering by fastest
 - [x] merge on metadata, don't overwrite
 - [x] sort the groups as well. our orderer will get called with groups and then with examples in the groups
+- [ ] parent groups will reflect the most relevant of their deepest children
+  - e.g. a top level group passes, but something nested way down has never been run (or failed today). we need to prioritize the group according to that.
+  - we should separate collecting the whole result from writing (currently we write each group as they come in)
+  - groups are run most nested to least, so we should be able to take advantage of that. the result of a group is the minimum of the result of its examples and its child groups
+    - need to recurse up as well. if a sub-sub-group is run, we need to update status for its parent and its parent's parent
+  - since children are run first and running a parent means running its children, we can assume a parent has had its children run (and its own status updated) by the time it runs
+    - so we update the parent status for the current run if it is "lower" than what's already there
