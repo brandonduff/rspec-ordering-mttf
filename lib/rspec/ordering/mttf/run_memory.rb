@@ -16,7 +16,7 @@ module RSpec
         end
 
         def collect_result(group)
-          run_results.merge!(construct_results(group))
+          construct_results(group)
         end
 
         def read
@@ -35,11 +35,27 @@ module RSpec
         end
 
         def construct_results(group)
-          result = group.examples.each_with_object({}) do |example, object|
+          new_results = group.examples.each_with_object({}) do |example, object|
             object[example.id] = ExampleResultData.from_example(example)
           end
-          result[group.id] = result.values.min
-          result
+
+          unless new_results.empty?
+            run_results.merge!(new_results)
+            run_results[group.id] = if run_results[group.id]
+              [run_results[group.id], new_results.values.min].min
+            else
+              new_results.values.min
+            end
+          end
+
+          unless group.top_level?
+            run_results[group.superclass.id] = if run_results[group.superclass.id]
+              [run_results[group.superclass.id], run_results[group.id]].min
+            else
+              run_results[group.id]
+            end
+          end
+          run_results
         end
 
         attr_reader :store, :run_results

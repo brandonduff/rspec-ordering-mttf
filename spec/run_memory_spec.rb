@@ -44,7 +44,7 @@ describe RSpec::Ordering::Mttf::RunMemory do
     expect(subject.read[group.descendants.last.id].status).to eq(:passed)
   end
 
-  xit "uses the most relevant status from the child example group for the parent" do
+  it "uses the most relevant status from the child example group for the parent" do
     group = sandboxed do |runner|
       group = RSpec.describe "some examples" do
         it "passes" do
@@ -54,6 +54,44 @@ describe RSpec::Ordering::Mttf::RunMemory do
         context "nested group" do
           it "fails" do
             expect(2).to eq(3)
+          end
+        end
+      end
+      runner.call(group)
+      group
+    end
+    expect(subject.read[group.id].status).to eq(:failed)
+  end
+
+  it "puts the top-level status as passing if all sub groups pass" do
+    group = sandboxed do |runner|
+      group = RSpec.describe "some examples" do
+        describe "a nested group" do
+          it "passes" do
+            expect(2).to eq(2)
+          end
+        end
+
+        describe "another nested group" do
+          it "passes" do
+            expect(2).to eq(2)
+          end
+        end
+      end
+      runner.call(group)
+      group
+    end
+    expect(subject.read[group.id].status).to eq(:passed)
+  end
+
+  it "propagates up deeploy nested groups" do
+    group = sandboxed do |runner|
+      group = RSpec.describe "some examples" do
+        describe "in a group" do
+          describe "inside of another a group" do
+            it "fails" do
+              expect(2).to eq(e)
+            end
           end
         end
       end
