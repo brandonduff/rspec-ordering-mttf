@@ -16,6 +16,7 @@ module RSpec
         config.current_date = current_date
         config.register_ordering(:global, Orderer.new(run_memory))
         config.reporter.register_listener(run_memory, :example_group_finished)
+        config.reporter.register_listener(run_memory, :stop)
       end
     end
   end
