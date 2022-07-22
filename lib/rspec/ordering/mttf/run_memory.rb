@@ -15,10 +15,6 @@ module RSpec
           write
         end
 
-        def collect_result(group)
-          construct_results(group)
-        end
-
         def read
           store.transaction(true) do
             store["results"]
@@ -34,28 +30,39 @@ module RSpec
           end
         end
 
-        def construct_results(group)
-          new_results = group.examples.each_with_object({}) do |example, object|
-            object[example.id] = ExampleResultData.from_example(example)
-          end
+        def collect_result(group)
+          new_results = construct_new_results(group)
 
           unless new_results.empty?
             run_results.merge!(new_results)
-            run_results[group.id] = if run_results[group.id]
-              [run_results[group.id], new_results.values.min].min
-            else
-              new_results.values.min
-            end
+            update_group_result(group, new_results)
           end
 
           unless group.top_level?
-            run_results[group.superclass.id] = if run_results[group.superclass.id]
-              [run_results[group.superclass.id], run_results[group.id]].min
-            else
-              run_results[group.id]
-            end
+            update_parent_result(group)
           end
-          run_results
+        end
+
+        def update_parent_result(group)
+          run_results[group.superclass.id] = if run_results[group.superclass.id]
+            [run_results[group.superclass.id], run_results[group.id]].min
+          else
+            run_results[group.id]
+          end
+        end
+
+        def update_group_result(group, new_results)
+          run_results[group.id] = if run_results[group.id]
+            [run_results[group.id], new_results.values.min].min
+          else
+            new_results.values.min
+          end
+        end
+
+        def construct_new_results(group)
+          group.examples.each_with_object({}) do |example, object|
+            object[example.id] = ExampleResultData.from_example(example)
+          end
         end
 
         attr_reader :store, :run_results
