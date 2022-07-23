@@ -10,12 +10,16 @@ module RSpec
           else
             example.metadata[:last_failed_date]
           end
-          new(status: example.execution_result.status, last_failed_date: last_failed_date, last_run_date: RSpec.configuration.current_date)
+          new(status: example.execution_result.status,
+            last_failed_date: last_failed_date,
+            last_run_date: RSpec.configuration.current_date)
         end
 
         def self.from_example_metadata(example)
           metadata = example.metadata
-          new(status: metadata[:status], last_failed_date: metadata[:last_failed_date], last_run_date: metadata[:last_run_date])
+          new(status: metadata[:status],
+            last_failed_date: metadata[:last_failed_date],
+            last_run_date: metadata[:last_run_date])
         end
 
         def <=>(other)
