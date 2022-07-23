@@ -5,7 +5,11 @@ module RSpec
         include Comparable
 
         def self.from_example(example)
-          last_failed_date = example.execution_result.status == :failed ? RSpec.configuration.current_date : example.metadata[:last_failed_date]
+          last_failed_date = if example.execution_result.status == :failed
+            RSpec.configuration.current_date
+          else
+            example.metadata[:last_failed_date]
+          end
           new(status: example.execution_result.status, last_failed_date: last_failed_date, last_run_date: RSpec.configuration.current_date)
         end
 
