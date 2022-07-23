@@ -84,7 +84,7 @@ describe RSpec::Ordering::Mttf::RunMemory do
     expect(subject.read[group].status).to eq(:passed)
   end
 
-  it "propagates up deeploy nested groups" do
+  it "propagates up deeply nested groups" do
     group = sandboxed do |runner|
       group = RSpec.describe "some examples" do
         describe "in a group" do
