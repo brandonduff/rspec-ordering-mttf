@@ -18,8 +18,8 @@ module RSpec
 
         def annotate_example(example)
           if (example_run_result = self[example])
-            example.metadata[:last_run_date] ||= example_run_result.last_run_date
-            example.metadata[:last_failed_date] ||= example_run_result.last_failed_date
+            example.metadata[:last_run_date] = example_run_result.last_run_date
+            example.metadata[:last_failed_date] = example_run_result.last_failed_date
           end
         end
 
