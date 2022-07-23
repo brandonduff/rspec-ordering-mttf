@@ -16,7 +16,7 @@ describe RSpec::Ordering::Mttf::RunMemory do
       example_group
     end
 
-    expect(subject.read[example_group.examples.first.id].status).to eq(:passed)
+    expect(subject.read[example_group.examples.first].status).to eq(:passed)
   end
 
   it "saves metadata for example groups" do
@@ -40,8 +40,8 @@ describe RSpec::Ordering::Mttf::RunMemory do
       group
     end
 
-    expect(subject.read[group.id].status).to eq(:failed)
-    expect(subject.read[group.descendants.last.id].status).to eq(:passed)
+    expect(subject.read[group].status).to eq(:failed)
+    expect(subject.read[group.descendants.last].status).to eq(:passed)
   end
 
   it "uses the most relevant status from the child example group for the parent" do
@@ -60,7 +60,7 @@ describe RSpec::Ordering::Mttf::RunMemory do
       runner.call(group)
       group
     end
-    expect(subject.read[group.id].status).to eq(:failed)
+    expect(subject.read[group].status).to eq(:failed)
   end
 
   it "puts the top-level status as passing if all sub groups pass" do
@@ -81,7 +81,7 @@ describe RSpec::Ordering::Mttf::RunMemory do
       runner.call(group)
       group
     end
-    expect(subject.read[group.id].status).to eq(:passed)
+    expect(subject.read[group].status).to eq(:passed)
   end
 
   it "propagates up deeploy nested groups" do
@@ -98,29 +98,33 @@ describe RSpec::Ordering::Mttf::RunMemory do
       runner.call(group)
       group
     end
-    expect(subject.read[group.id].status).to eq(:failed)
+    expect(subject.read[group].status).to eq(:failed)
   end
 
   it "loads metadata from previous runs" do
     last_run_date = last_failed_date = nil
     ordering_log = []
-    sandboxed do |runner|
-      example_group = RSpec.describe "examples" do
-        it "is an example" do |example|
-          ordering_log << 1
-          expect(2).to eq(2)
-          last_run_date = example.metadata[:last_run_date]
-        end
+    run_examples = -> do
+      sandboxed do |runner|
+        example_group = RSpec.describe "examples" do
+          it "is an example" do |example|
+            ordering_log << 1
+            expect(2).to eq(2)
+            last_run_date = example.metadata[:last_run_date]
+          end
 
-        it "is a failed example" do |example|
-          ordering_log << 2
-          last_failed_date = example.metadata[:last_failed_date]
-          expect(2).to eq(1)
+          it "is a failed example" do |example|
+            ordering_log << 2
+            last_failed_date = example.metadata[:last_failed_date]
+            expect(2).to eq(1)
+          end
         end
+        runner.call(example_group)
       end
-      runner.call(example_group)
-      runner.call(example_group)
     end
+
+    2.times { run_examples.call }
+
     expect(last_run_date).to eq(Date.new(1993, 10, 3))
     expect(last_failed_date).to eq(Date.new(1993, 10, 3))
     expect(ordering_log).to eq([1, 2, 2, 1])

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "mttf/version"
+require_relative "mttf/run_results"
 require_relative "mttf/run_memory"
 require_relative "mttf/orderer"
 require_relative "mttf/example_result_data"
