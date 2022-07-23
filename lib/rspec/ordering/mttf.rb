@@ -10,7 +10,7 @@ require "yaml/store"
 module RSpec
   module Ordering
     module Mttf
-      def self.configure(config, current_date:, previous_run_data:)
+      def self.configure(config, current_date: Date.today, previous_run_data: ".rspec-run-data.store")
         run_memory = RunMemory.new(previous_run_data)
         config.add_setting :current_date
         config.current_date = current_date
