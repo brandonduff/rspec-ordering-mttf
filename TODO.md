@@ -4,4 +4,4 @@
 - [x] merge on metadata, don't overwrite
 - [x] sort the groups as well. our orderer will get called with groups and then with examples in the groups
 - [x] parent groups will reflect the most relevant of their deepest children
-- [ ] refactoring: make RunResults a class instead of a hash. Should clean up a lot
+- [x] refactoring: make RunResults a class instead of a hash. Should clean up a lot
