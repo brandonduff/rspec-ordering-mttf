@@ -11,8 +11,8 @@ module RSpec
         end
 
         def record_group(group)
-          record_examples(group)
-          update_group(group, @results.values.min)
+          new_examples = record_examples(group)
+          update_group(group, new_examples.min)
           update_group(group.superclass, self[group]) unless group.top_level?
         end
 
@@ -39,6 +39,8 @@ module RSpec
         end
 
         def update_group(group, new_value)
+          return unless new_value
+
           results_for_group = self[group]
           self[group] = if results_for_group
             [results_for_group, new_value].min
@@ -48,7 +50,7 @@ module RSpec
         end
 
         def record_examples(group)
-          group.examples.each do |example|
+          group.examples.map do |example|
             self[example] = ExampleResultData.from_example(example)
           end
         end

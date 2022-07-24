@@ -17,6 +17,7 @@
 require "date"
 require "rspec/core/sandbox"
 require "rspec/ordering/mttf"
+require "support/example_tests"
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
