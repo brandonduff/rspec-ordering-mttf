@@ -1,6 +1,8 @@
 - [x] Record metadata at end of run
 - [x] Read metadata at start of run
 - [ ] Running in date groups, ordering by fastest
+  - [x] record and compare run time on examples
+  - [ ] record run time on groups
 - [x] merge on metadata, don't overwrite
 - [x] sort the groups as well. our orderer will get called with groups and then with examples in the groups
 - [x] parent groups will reflect the most relevant of their deepest children
