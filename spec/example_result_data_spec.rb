@@ -44,5 +44,23 @@ describe RSpec::Ordering::Mttf::ExampleResultData do
 
       expect(faster_result).to be < slower_result
     end
+
+    it "runs the faster test first, all else being equal two" do
+      date = Date.today
+      faster = OpenStruct.new(metadata: {})
+      faster.metadata[:last_failed_date] = date
+      faster.metadata[:last_run_date] = date
+      faster.metadata[:run_time] = 1
+
+      slower = OpenStruct.new(metadata: {})
+      slower.metadata[:last_failed_date] = date
+      slower.metadata[:last_run_date] = date
+      slower.metadata[:run_time] = 2
+
+      faster_result = described_class.from_example_metadata(faster)
+      slower_result = described_class.from_example_metadata(slower)
+
+      expect(faster_result).to be < slower_result
+    end
   end
 end

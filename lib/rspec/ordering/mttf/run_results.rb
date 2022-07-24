@@ -13,7 +13,11 @@ module RSpec
         def record_group(group)
           new_examples = record_examples(group)
           update_group(group, new_examples.min)
-          update_group(group.superclass, self[group]) unless group.top_level?
+          self[group].run_time += new_examples.sum(&:run_time)
+          unless group.top_level?
+            update_group(group.superclass, self[group])
+            self[group.superclass].run_time += self[group].run_time
+          end
         end
 
         def annotate_example(example)
@@ -42,11 +46,17 @@ module RSpec
           return unless new_value
 
           results_for_group = self[group]
-          self[group] = if results_for_group
+          smallest_group = if results_for_group
             [results_for_group, new_value].min
           else
             new_value
           end
+          self[group] = ExampleResultData.new(
+            status: smallest_group.status,
+            last_failed_date: smallest_group.last_failed_date,
+            last_run_date: smallest_group.last_run_date,
+            run_time: self[group] ? self[group].run_time : 0
+          )
         end
 
         def record_examples(group)
