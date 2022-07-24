@@ -20,7 +20,8 @@ module RSpec
           metadata = example.metadata
           new(status: metadata[:status],
             last_failed_date: metadata[:last_failed_date],
-            last_run_date: metadata[:last_run_date])
+            last_run_date: metadata[:last_run_date],
+            run_time: metadata[:run_time])
         end
 
         def <=>(other)
@@ -32,8 +33,10 @@ module RSpec
             1
           elsif other.last_failed_date.nil?
             -1
-          else
+          elsif other.last_failed_date != last_failed_date
             other.last_failed_date <=> last_failed_date
+          else
+            run_time <=> other.run_time
           end
         end
       end
