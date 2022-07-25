@@ -45,12 +45,8 @@ module RSpec
         def update_group(group, new_value)
           return unless new_value
 
-          results_for_group = self[group]
-          smallest_group = if results_for_group
-            [results_for_group, new_value].min
-          else
-            new_value
-          end
+          smallest_group = [self[group], new_value].compact.min
+
           self[group] = ExampleResultData.new(
             status: smallest_group.status,
             last_failed_date: smallest_group.last_failed_date,
