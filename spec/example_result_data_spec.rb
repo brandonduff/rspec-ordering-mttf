@@ -1,5 +1,3 @@
-require "ostruct"
-
 describe RSpec::Ordering::Mttf::ExampleResultData do
   include_context "Example Tests"
 
@@ -28,41 +26,24 @@ describe RSpec::Ordering::Mttf::ExampleResultData do
 
   describe "comparing by run time" do
     it "runs the faster test first, all else being equal" do
-      date = Date.today
-      faster = OpenStruct.new(metadata: {})
-      faster.metadata[:last_failed_date] = date
-      faster.metadata[:last_run_date] = date
-      faster.metadata[:run_time] = 1
+      group = RSpec.describe "group" do
+        it "passes" do
+          expect(2).to eq(2)
+        end
 
-      slower = OpenStruct.new(metadata: {})
-      slower.metadata[:last_failed_date] = date
-      slower.metadata[:last_run_date] = date
-      slower.metadata[:run_time] = 2
+        it "also passes" do
+          expect(1).to eq(1)
+        end
+      end
+      group.run
+      faster, slower = group.examples
+      faster.execution_result.run_time = 1
+      slower.execution_result.run_time = 2
 
-      faster_result = described_class.from_example_metadata(faster)
-      slower_result = described_class.from_example_metadata(slower)
-
-      expect(faster_result).to be < slower_result
-    end
-
-    # TODO: make this work by using real test objects so we integrate
-    # the keys correctly. delete old test
-    #
-    # then we should refactor and see if we can improve the design
-    # to remove this flaw
-    it "runs the faster test first, all else being equal two" do
-      pending "make it integrate"
-      date = Date.today
-      faster = OpenStruct.new(metadata: {})
-      faster.metadata[:last_failed_date] = date
-      faster.metadata[:last_run_date] = date
-      faster.metadata[:run_time] = 1
-
-      slower = OpenStruct.new(metadata: {})
-      slower.metadata[:last_failed_date] = date
-      slower.metadata[:last_run_date] = date
-      slower.metadata[:run_time] = 2
-
+      results = RSpec::Ordering::Mttf::RunResults.new
+      results.record_group(group)
+      results.annotate_example(faster)
+      results.annotate_example(slower)
       faster_result = described_class.from_example_metadata(faster)
       slower_result = described_class.from_example_metadata(slower)
 

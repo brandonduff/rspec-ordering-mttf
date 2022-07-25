@@ -21,7 +21,7 @@ module RSpec
           new(status: metadata[:status],
             last_failed_date: metadata[:last_failed_date],
             last_run_date: metadata[:last_run_date],
-            run_time: metadata[:run_time])
+            run_time: metadata[:last_run_time])
         end
 
         def <=>(other)
@@ -29,11 +29,12 @@ module RSpec
             -1
           elsif other.last_run_date.nil?
             1
-          elsif last_failed_date.nil?
+          elsif last_failed_date.nil? && !other.last_failed_date.nil?
             1
-          elsif other.last_failed_date.nil?
+          elsif other.last_failed_date.nil? && !last_failed_date.nil?
             -1
-          elsif other.last_failed_date != last_failed_date
+          elsif other.last_failed_date && last_failed_date &&
+              other.last_failed_date != last_failed_date
             other.last_failed_date <=> last_failed_date
           else
             run_time <=> other.run_time

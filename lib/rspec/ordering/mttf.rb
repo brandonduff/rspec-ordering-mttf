@@ -5,7 +5,6 @@ require_relative "mttf/run_results"
 require_relative "mttf/run_memory"
 require_relative "mttf/orderer"
 require_relative "mttf/example_result_data"
-require "ostruct"
 require "yaml/store"
 
 module RSpec
