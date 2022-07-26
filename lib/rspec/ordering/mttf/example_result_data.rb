@@ -36,6 +36,10 @@ module RSpec
           elsif other.last_failed_date && last_failed_date &&
               other.last_failed_date != last_failed_date
             other.last_failed_date <=> last_failed_date
+          elsif run_time && !other.run_time
+            -1
+          elsif !run_time && other.run_time
+            1
           else
             run_time <=> other.run_time
           end

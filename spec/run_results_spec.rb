@@ -66,4 +66,22 @@ describe RSpec::Ordering::Mttf::RunResults do
 
     expect(subject[passing_group].status).to eq(:passed)
   end
+
+  it "can record a group that is partially run" do
+    group = RSpec.describe "group" do
+      it "runs" do
+        expect(2).to eq(2)
+        RSpec.world.wants_to_quit = true
+      end
+
+      it "doesn't run" do
+        expect(2).to eq(3)
+      end
+    end
+    group.run
+
+    subject.record_group(group)
+
+    expect(subject[group].status).to eq(:passed)
+  end
 end

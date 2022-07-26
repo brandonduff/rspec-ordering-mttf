@@ -50,4 +50,29 @@ describe RSpec::Ordering::Mttf::ExampleResultData do
       expect(faster_result).to be < slower_result
     end
   end
+
+  context "when one of the examples was not run" do
+    # This can happen when we exit early. It only matters for
+    # recording group results, not ordering. We don't want to
+    # record the not-run example as the result for the group.
+    it "means the run one is less" do
+      run_group = RSpec.describe "group" do
+        it "will be run" do
+          expect(2).to eq(2)
+        end
+      end
+
+      not_run_group = RSpec.describe "not run group" do
+        it "will not be run" do
+          expect(2).to eq(2)
+        end
+      end
+
+      run_group.run
+      run_result = described_class.from_example(run_group.examples.first)
+      not_run_result = described_class.from_example(not_run_group.examples.first)
+      expect(run_result).to be < not_run_result
+      expect(not_run_result).to be > run_result
+    end
+  end
 end

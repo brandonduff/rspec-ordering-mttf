@@ -13,7 +13,7 @@ module RSpec
         def record_group(group)
           new_examples = record_examples(group)
           update_group(group, new_examples.min)
-          self[group].run_time += new_examples.sum(&:run_time)
+          self[group].run_time += new_examples.map(&:run_time).compact.sum
           unless group.top_level?
             update_group(group.superclass, self[group])
             self[group.superclass].run_time += self[group].run_time
