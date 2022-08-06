@@ -1,4 +1,4 @@
-describe RSpec::Ordering::Mttf::ExampleResultData do
+RSpec.describe RSpec::Ordering::Mttf::ExampleResultData do
   include_context "Example Tests"
 
   describe ".from_example" do

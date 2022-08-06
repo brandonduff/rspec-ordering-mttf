@@ -1,4 +1,4 @@
-describe RSpec::Ordering::Mttf::RunMemory do
+RSpec.describe RSpec::Ordering::Mttf::RunMemory do
   subject { described_class.new("test_results.store") }
 
   after do

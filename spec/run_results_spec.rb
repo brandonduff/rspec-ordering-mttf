@@ -1,6 +1,6 @@
 require "rspec"
 
-describe RSpec::Ordering::Mttf::RunResults do
+RSpec.describe RSpec::Ordering::Mttf::RunResults do
   include_context "Example Tests"
 
   describe "last run time" do
