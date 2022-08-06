@@ -13,9 +13,9 @@ If you do Test-Driven Development, you probably implement some version of this a
 
 These heuristics are taken from [JUnitMax](https://junit.org/junit4/javadoc/latest/org/junit/experimental/max/MaxCore.html). In fact, this project is basically my attempt to port the core ordering functionality, as I understand it, to RSpec.
 
-In practice, I encourage you to try running as large a subset of your tests as you reasonably can to let the tool gather runtime data. Then start TDDing and simply rerunning that large group. Use RSpec's --fail-fast option as well for the quickest feedback.
+In practice, I encourage you to try running as large a subset of your tests as you reasonably can to let the tool gather runtime data. Then start TDDing and simply rerunning that large group. Use RSpec's `--fail-fast` option as well for the quickest feedback.
 
-If you get strange failures, try deleting the history file (.rspec-run-data.store by default). Please feel free to report a bug or submit a fix!
+If you get strange failures, try deleting the history file (`.rspec-run-data.store` by default). Please feel free to report a bug or submit a fix!
 
 ## Installation
 
