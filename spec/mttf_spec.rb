@@ -1,8 +1,4 @@
 RSpec.describe RSpec::Ordering::Mttf do
-  it "has a version" do
-    expect(described_class::VERSION).to eq("0.1.0")
-  end
-
   def run_with_ordering_log
     ordering_log = []
     RSpec::Core::Sandbox.sandboxed do |config|
