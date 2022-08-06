@@ -12,11 +12,13 @@ module RSpec
     module Mttf
       def self.configure(config, current_date: Date.today, previous_run_data: ".rspec-run-data.store")
         run_memory = RunMemory.new(previous_run_data)
-        config.add_setting :current_date
-        config.current_date = current_date
         config.register_ordering(:global, Orderer.new(run_memory))
+
         config.reporter.register_listener(run_memory, :example_group_finished)
         config.reporter.register_listener(run_memory, :stop)
+
+        config.add_setting :current_date
+        config.current_date = current_date
       end
     end
   end

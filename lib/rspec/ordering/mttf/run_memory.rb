@@ -17,7 +17,7 @@ module RSpec
 
         def read
           store.transaction(true) do
-            RunResults.new(store["results"])
+            RunResults.new(store["results"] || {})
           end
         end
 

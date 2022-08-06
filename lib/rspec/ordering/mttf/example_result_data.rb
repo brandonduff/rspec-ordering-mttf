@@ -1,7 +1,7 @@
 module RSpec
   module Ordering
     module Mttf
-      ExampleResultData = Struct.new(:status, :last_failed_date, :last_run_date, :run_time, keyword_init: true) do
+      class ExampleResultData
         include Comparable
 
         def self.from_example(example)
@@ -23,6 +23,28 @@ module RSpec
             last_run_date: metadata[:last_run_date],
             run_time: metadata[:last_run_time])
         end
+
+        def self.add_examples_to_group_results(examples, group_results)
+          examples = Array(examples)
+          summed_run_time = examples.map(&:run_time).compact.sum
+          smallest_result = [group_results, examples.min].compact.min
+
+          new(
+            status: smallest_result.status,
+            last_failed_date: smallest_result.last_failed_date,
+            last_run_date: smallest_result.last_run_date,
+            run_time: (group_results&.run_time || 0) + summed_run_time
+          )
+        end
+
+        def initialize(status:, last_failed_date:, last_run_date:, run_time:)
+          @status = status
+          @last_failed_date = last_failed_date
+          @last_run_date = last_run_date
+          @run_time = run_time
+        end
+
+        attr_reader :status, :last_failed_date, :last_run_date, :run_time
 
         def <=>(other)
           if last_run_date.nil?

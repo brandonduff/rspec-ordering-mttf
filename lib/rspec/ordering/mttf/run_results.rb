@@ -3,21 +3,17 @@ module RSpec
     module Mttf
       class RunResults
         def initialize(hash = {})
-          @results = hash || {}
+          @results = hash
         end
 
         def merge(other)
-          @results.merge(other.results)
+          results.merge(other.results)
         end
 
         def record_group(group)
           new_examples = record_examples(group)
-          update_group(group, new_examples.min)
-          self[group].run_time += new_examples.map(&:run_time).compact.sum
-          unless group.top_level?
-            update_group(group.superclass, self[group])
-            self[group.superclass].run_time += self[group].run_time
-          end
+          updated_group_results = update_group(group, new_examples)
+          update_group(group.superclass, updated_group_results) unless group.top_level?
         end
 
         def annotate_example(example)
@@ -29,7 +25,7 @@ module RSpec
         end
 
         def [](example)
-          @results[example.id]
+          results[example.id]
         end
 
         protected
@@ -39,20 +35,12 @@ module RSpec
         private
 
         def []=(example, value)
-          @results[example.id] = value
+          results[example.id] = value
         end
 
-        def update_group(group, new_value)
-          return unless new_value
-
-          smallest_group = [self[group], new_value].compact.min
-
-          self[group] = ExampleResultData.new(
-            status: smallest_group.status,
-            last_failed_date: smallest_group.last_failed_date,
-            last_run_date: smallest_group.last_run_date,
-            run_time: self[group] ? self[group].run_time : 0
-          )
+        def update_group(group, new_examples)
+          self[group] = ExampleResultData
+            .add_examples_to_group_results(new_examples, self[group])
         end
 
         def record_examples(group)
