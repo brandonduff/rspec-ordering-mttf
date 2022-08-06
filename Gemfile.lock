@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rspec-ordering-mttf (0.1.0)
+    rspec-ordering-mttf (0.1.1)
       rspec
 
 GEM
