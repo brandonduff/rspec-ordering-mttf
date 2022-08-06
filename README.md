@@ -4,14 +4,18 @@ A custom orderer for RSpec that optimizes for test latency (mean time to failure
 
 ## Why would I want this?
 
-If you do Test-Driven Development, you likely implement some version of this algorithm manually all the time. It's likely you have too many tests to run them all on every change, so you decide which tests to run based on those that are likely to fail and how quickly they run. This orderer uses a basic set of heuristics to automate that work:
+If you do Test-Driven Development, you probably implement some version of this algorithm manually all the time. It's likely you have too many tests to run them all on every change, so you decide which tests to run based on those that are likely to fail and how quickly they run. This orderer uses a basic set of heuristics to automate that work:
 
 1. Never-run tests first, in arbitrary order
 1. Group remaining tests by the date at which they most recently failed.
 1. Sort groups such that the most recent failure date is first, and never-failing tests are at the end.
 1. Within a group, run the fastest tests first.
 
-These heuristics are taken from [JUnitMax](https://junit.org/junit4/javadoc/latest/org/junit/experimental/max/MaxCore.html).
+These heuristics are taken from [JUnitMax](https://junit.org/junit4/javadoc/latest/org/junit/experimental/max/MaxCore.html). In fact, this project is basically my attempt to port the core ordering functionality, as I understand it, to RSpec.
+
+In practice, I encourage you to try running as large a subset of your tests as you reasonably can to let the tool gather runtime data. Then start TDDing and simply rerunning that large group. Use RSpec's --fail-fast option as well for the quickest feedback.
+
+If you get strange failures, try deleting the history file (.rspec-run-data.store by default). Please feel free to report a bug or submit a fix!
 
 ## Installation
 
@@ -25,7 +29,13 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-Call `RSpec::Ordering::Mttf.configure` with the RSpec configuration. This will configure a default global ordering of "mean time to failure." I expect to change these ergonomics soon, but I haven't yet decided how.
+Call `RSpec::Ordering::Mttf.configure` with the RSpec configuration. This will configure a default global ordering of "mean time to failure."
+
+```ruby
+RSpec.configure do |config|
+  RSpec::Ordering::Mttf.configure(config)
+end
+```
 
 ## Development
 
