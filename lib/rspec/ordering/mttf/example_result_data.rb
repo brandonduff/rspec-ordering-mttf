@@ -44,7 +44,7 @@ module RSpec
           @run_time = run_time
         end
 
-        attr_reader :status, :last_failed_date, :last_run_date, :run_time
+        attr_accessor :status, :last_failed_date, :last_run_date, :run_time
 
         def <=>(other)
           if last_run_date.nil?
@@ -65,6 +65,10 @@ module RSpec
           else
             run_time <=> other.run_time
           end
+        end
+
+        def members
+          [:status, :last_failed_date, :last_run_date, :run_time]
         end
       end
     end
